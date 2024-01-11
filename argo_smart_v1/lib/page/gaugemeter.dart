@@ -36,7 +36,7 @@ class _PHMeterState extends State<Meteran> {
       appBar: AppBar(
           backgroundColor: Color(0xffc7f6ce),
           toolbarHeight: 30,
-          title: Text("Selamat datang! Hallo bapak Emran",
+          title: Text("Selamat datang di ArgoSmart!",
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -121,6 +121,17 @@ class _PHMeterState extends State<Meteran> {
                               angle: 90,
                               positionFactor: 0.1,
                             ),
+                            GaugeAnnotation(
+                              widget: Text(
+                                'pH Meter',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              angle: 90,
+                              positionFactor: 1,
+                            )
                           ],
                         )
                       ],
@@ -191,6 +202,17 @@ class _PHMeterState extends State<Meteran> {
                               angle: 90,
                               positionFactor: 0.1,
                             ),
+                            GaugeAnnotation(
+                              widget: Text(
+                                'Kelembapan',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              angle: 90,
+                              positionFactor: 1,
+                            )
                           ],
                         )
                       ],
@@ -264,6 +286,17 @@ class _PHMeterState extends State<Meteran> {
                           angle: 90,
                           positionFactor: 0.1,
                         ),
+                        GaugeAnnotation(
+                          widget: Text(
+                            'Suhu',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          angle: 90,
+                          positionFactor: 1,
+                        )
                       ],
                     )
                   ],

@@ -1,4 +1,6 @@
 import 'package:argo_smart_v1/page/homePage.dart';
+import 'package:argo_smart_v1/page/schdulingPage.dart';
+import 'package:argo_smart_v1/page/setingPage.dart';
 import 'package:flutter/material.dart';
 
 class NavBar extends StatefulWidget {
@@ -11,8 +13,8 @@ class _MyAppState extends State<NavBar> {
 
   final List<Widget> _pages = [
     Center(child: HomePage()),
-    Center(child: Text('ComingSoon')),
-    Center(child: Text('ComingSoon')),
+    Center(child: SchdulingPage()),
+    Center(child: SetingingPage()),
   ];
 
   void _onItemTapped(int index) {
