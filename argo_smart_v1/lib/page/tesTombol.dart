@@ -14,7 +14,7 @@ class _MyappState extends State<TombolTes> {
     return Center(
       child: ElevatedButton(
           onPressed: () {
-            dbr.child("penyiraman").set({"Switch": !On});
+            dbr.child("switch").set({"boolean": !On});
             setState(() {
               On = !On;
             });

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:argo_smart_v1/page/logTest.dart';
 import 'package:argo_smart_v1/page/login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
