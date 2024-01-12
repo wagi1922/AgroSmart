@@ -1,12 +1,12 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
-class TombolTes extends StatefulWidget {
+class Tombolsiram extends StatefulWidget {
   @override
   _MyappState createState() => _MyappState();
 }
 
-class _MyappState extends State<TombolTes> {
+class _MyappState extends State<Tombolsiram> {
   bool On = false;
   final dbr = FirebaseDatabase.instance.reference();
   @override
@@ -23,7 +23,7 @@ class _MyappState extends State<TombolTes> {
             shape: const StadiumBorder(),
             elevation: 20,
             shadowColor: Colors.grey,
-            minimumSize: const Size(180, 60),
+            minimumSize: const Size(200, 60),
             backgroundColor: const Color(0xFF4F6F52),
           ),
           child: On

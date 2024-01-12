@@ -1,6 +1,6 @@
 import 'package:argo_smart_v1/page/homePage.dart';
-import 'package:argo_smart_v1/page/tesTombol.dart';
-import 'package:argo_smart_v1/schdule/schedule.dart';
+import 'package:argo_smart_v1/schdule/schdule_page.dart';
+import 'package:argo_smart_v1/schdule/tombolSiram.dart';
 import 'package:argo_smart_v1/page/setingPage.dart';
 import 'package:flutter/material.dart';
 
@@ -14,7 +14,7 @@ class _MyAppState extends State<NavBar> {
 
   final List<Widget> _pages = [
     Center(child: HomePage()),
-    Center(child: TombolTes()),
+    Center(child: SchedulePage()),
     Center(child: SetingingPage()),
   ];
 

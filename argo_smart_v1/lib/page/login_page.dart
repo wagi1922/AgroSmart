@@ -15,17 +15,26 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  bool _isPassword = false;
+  bool _isLoginFailed = false;
+
   void signUserIn() async {
     try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: emailController.text,
         password: passwordController.text,
       );
+      setState(() {
+        _isLoginFailed = false;
+      });
       // If authentication is successful, navigate to the next screen
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
         return NavBar();
       }));
     } catch (error) {
+      setState(() {
+        _isLoginFailed = true;
+      });
       // If authentication fails, handle the error
       print('Error signing in: $error');
       // You can display an error message or take other actions based on the error
@@ -126,6 +135,12 @@ class _LoginPageState extends State<LoginPage> {
         _rememberForget(),
         const SizedBox(height: 5),
         _loginButton(),
+        SizedBox(height: 20),
+        if (_isLoginFailed) // Tambahkan widget Text hanya jika login gagal
+          Text(
+            '    Email atau password salah. Silakan coba lagi.',
+            style: TextStyle(color: Colors.red),
+          ),
       ],
     );
   }
@@ -138,7 +153,22 @@ class _LoginPageState extends State<LoginPage> {
       decoration: InputDecoration(
         labelText: 'Email',
         hintText: 'Masukkan email Anda',
-        border: OutlineInputBorder(),
+        errorBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.red),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.red),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+            color: myColor, // Warna border saat input difokuskan
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+            color: controller.text.isEmpty ? Colors.grey : Colors.red,
+          ),
+        ),
         fillColor: Colors.grey.withOpacity(0.1),
         filled: true,
       ),
@@ -146,18 +176,44 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _TextInputPass(TextEditingController controller,
-      {isPassword = false}) {
+      {bool isPassword = false}) {
     return TextField(
       controller: controller, // Pass the controller here
       decoration: InputDecoration(
         labelText: 'Password',
         hintText: 'Masukkan password Anda',
-        border: OutlineInputBorder(),
+        errorBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.red),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.red),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+            color: myColor, // Warna border saat input difokuskan
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+            color: controller.text.isEmpty ? Colors.grey : Colors.red,
+          ),
+        ),
         fillColor: Colors.grey.withOpacity(0.1),
         filled: true,
-        suffixIcon: isPassword ? Icon(Icons.remove_red_eye) : Icon(Icons.done),
+        suffixIcon: isPassword
+            ? IconButton(
+                icon: _isPassword
+                    ? Icon(Icons.visibility)
+                    : Icon(Icons.visibility_off),
+                onPressed: () {
+                  setState(() {
+                    _isPassword = !_isPassword;
+                  });
+                },
+              )
+            : null,
       ),
-      obscureText: isPassword,
+      obscureText: !_isPassword,
     );
   }
 

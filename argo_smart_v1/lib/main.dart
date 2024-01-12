@@ -22,8 +22,8 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: true,
       home: Stack(
         children: [
-          SplahPage(),
           AuthPage(),
+          SplahPage(),
         ],
       ),
     );
