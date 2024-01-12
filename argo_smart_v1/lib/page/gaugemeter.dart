@@ -1,7 +1,7 @@
 import 'package:argo_smart_v1/page/sliderBar.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
-import 'dart:math' as math;
+import '../spreadsheet_services.dart';
 
 class Meteran extends StatefulWidget {
   @override
@@ -18,15 +18,19 @@ class _PHMeterState extends State<Meteran> {
   // Temperature value
   double temperature = 0.0;
 
-  // Random number generator
-  math.Random random = math.Random();
-
   // Generate random values
-  void generateValues() {
+  void generateValues() async {
+    final newestData = await SpreadsheetService.getNewestData();
+
+    // Cast the String values from newestData to double
+    final phDouble = double.parse(newestData[1]);
+    final humidityDouble = double.parse(newestData[0]);
+    final temperatureDouble = double.parse(newestData[2]);
+
     setState(() {
-      ph = random.nextDouble() * 14;
-      humidity = random.nextDouble() * 100;
-      temperature = random.nextDouble() * 50;
+      ph = phDouble;
+      humidity = humidityDouble;
+      temperature = temperatureDouble;
     });
   }
 
