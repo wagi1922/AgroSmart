@@ -1,3 +1,6 @@
+import 'package:argo_smart_v1/schdule/pestisida.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
@@ -6,21 +9,23 @@ class SiramAir extends StatefulWidget {
   const SiramAir({Key? key}) : super(key: key);
 
   @override
-  _SchwiggetState createState() => _SchwiggetState();
+  _SiramAirState createState() => _SiramAirState();
 }
 
-class _SchwiggetState extends State<SiramAir> {
-  TextEditingController _titleController = TextEditingController();
+class _SiramAirState extends State<SiramAir> {
   DateTime _selectedDate = DateTime.now();
   TimeOfDay _selectedTime = TimeOfDay.now();
   TimeOfDay _scheduledTime = TimeOfDay(hour: 24, minute: 0);
   late StreamController<DateTime> _dateTimeController;
+  final dbr = FirebaseDatabase.instance.reference();
   bool _userSelectedNewTime = false;
+  bool _manualSiramActive = false;
 
   @override
   void initState() {
     super.initState();
     _dateTimeController = StreamController<DateTime>.broadcast();
+    _loadSavedTime();
     _startTimer();
   }
 
@@ -38,34 +43,65 @@ class _SchwiggetState extends State<SiramAir> {
     });
   }
 
+  Future<void> _loadSavedTime() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final savedHour = prefs.getInt('selectedHourAir') ?? _selectedTime.hour;
+    final savedMinute =
+        prefs.getInt('selectedMinuteAir') ?? _selectedTime.minute;
+
+    setState(() {
+      _selectedTime = TimeOfDay(hour: savedHour, minute: savedMinute);
+      _updateCountdown();
+    });
+  }
+
+  Future<void> _saveSelectedTime() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setInt('selectedHourAir', _selectedTime.hour);
+    prefs.setInt('selectedMinuteAir', _selectedTime.minute);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        SizedBox(height: 10),
+        SizedBox(height: 15),
         Container(
           width: 370,
           height: 155,
           decoration: BoxDecoration(
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.2),
-                spreadRadius: 2,
-                blurRadius: 2,
+                color: Colors.grey.withOpacity(0.25),
+                spreadRadius: 4,
+                blurRadius: 4,
                 offset: Offset(4, 4),
               ),
             ],
             color: Color.fromARGB(255, 189, 255, 180),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(10),
+              topRight: Radius.circular(10),
+            ),
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xffddffc3), Color(0x00fbffcf)],
+            ),
           ),
           child: Column(
             children: [
-              SizedBox(height: 15),
+              SizedBox(height: 10),
               _buildTimeContainer(),
-              SizedBox(height: 15),
+              SizedBox(height: 10),
               _buildScheduleContainer(),
             ],
           ),
         ),
+        SizedBox(height: 15),
+        SiramPestisida(),
+        SizedBox(height: 150),
+        _buildManualSiramButton(),
       ],
     );
   }
@@ -73,9 +109,9 @@ class _SchwiggetState extends State<SiramAir> {
   Widget _buildTimeContainer() {
     return Row(
       children: [
-        SizedBox(width: 15),
+        SizedBox(width: 13),
         _buildTimeTextContainer(),
-        SizedBox(width: 10),
+        SizedBox(width: 5),
         Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
@@ -86,7 +122,7 @@ class _SchwiggetState extends State<SiramAir> {
               child: _buildDayText(),
             ),
             Container(
-              width: 180,
+              width: 190,
               height: 30,
               alignment: Alignment.bottomRight,
               child: _buildCountdown(),
@@ -100,25 +136,24 @@ class _SchwiggetState extends State<SiramAir> {
   Widget _buildTimeTextContainer() {
     return Container(
       width: 150,
-      height: 50,
+      height: 60,
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.transparent, width: 5),
+        borderRadius: BorderRadius.circular(6),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            spreadRadius: 2,
-            blurRadius: 2,
+            color: Colors.grey.withOpacity(0.25),
+            spreadRadius: 3,
+            blurRadius: 3,
             offset: Offset(4, 4),
           ),
         ],
-        color: Color.fromARGB(255, 235, 255, 223),
+        color: Color.fromARGB(255, 238, 253, 228),
       ),
       child: Center(
         child: Text(
           '${_formatTime(_selectedTime)}',
           style: TextStyle(
-            fontSize: 30,
-            fontWeight: FontWeight.bold,
+            fontSize: 40,
             color: Colors.black,
           ),
         ),
@@ -173,16 +208,18 @@ class _SchwiggetState extends State<SiramAir> {
   Widget _buildScheduleContainer() {
     return Container(
       width: 370,
-      height: 45,
+      height: 55,
       decoration: BoxDecoration(
         border: Border.all(color: Colors.transparent, width: 5),
         color: Color(0xffb6f490),
       ),
       child: Row(
         children: [
-          Text("  Jadwal Penyiraman Otomatis",
-              style: TextStyle(fontWeight: FontWeight.bold)),
-          SizedBox(width: 100),
+          Text(
+            "  Jadwal Siram Air Otomatis",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+          ),
+          SizedBox(width: 115),
           IconButton(
             icon: Icon(Icons.edit),
             onPressed: () => _selectTime(context),
@@ -194,14 +231,21 @@ class _SchwiggetState extends State<SiramAir> {
 
   Widget _buildCountdown() {
     final now = DateTime.now();
-    final scheduledDateTime = DateTime(now.year, now.month, now.day,
-        _scheduledTime.hour, _scheduledTime.minute);
-    final difference = scheduledDateTime.difference(now);
+    final scheduledDateTime = DateTime(
+        now.year, now.month, now.day, _selectedTime.hour, _selectedTime.minute);
 
-    return Text(
-      'Akan mulai ${_formatDuration(difference)}',
-      style: TextStyle(fontSize: 12, color: Colors.black),
-    );
+    if (scheduledDateTime.isBefore(now)) {
+      return Text(
+        'Penyiraman telah dilakukan',
+        style: TextStyle(fontSize: 12, color: Colors.black),
+      );
+    } else {
+      final difference = scheduledDateTime.difference(now);
+      return Text(
+        'Akan dimulai ${_formatDuration(difference)}',
+        style: TextStyle(fontSize: 12, color: Colors.black),
+      );
+    }
   }
 
   String _formatDuration(Duration duration) {
@@ -217,9 +261,9 @@ class _SchwiggetState extends State<SiramAir> {
     if (time != null) {
       setState(() {
         _selectedTime = time;
-        _userSelectedNewTime =
-            false; // Reset to false when user selects new time
+        _userSelectedNewTime = false;
         _updateCountdown();
+        _saveSelectedTime();
       });
     }
   }
@@ -227,15 +271,31 @@ class _SchwiggetState extends State<SiramAir> {
   void _updateCountdown() {
     final now = DateTime.now();
     final scheduledDateTime = DateTime(
-      now.year,
-      now.month,
-      now.day,
-      _selectedTime.hour,
-      _selectedTime.minute,
-    );
+        now.year, now.month, now.day, _selectedTime.hour, _selectedTime.minute);
     final difference = scheduledDateTime.difference(now);
 
-    _dateTimeController
-        .add(now.add(difference)); // Use scheduled time for countdown
+    _dateTimeController.add(now.add(difference));
+  }
+
+  Widget _buildManualSiramButton() {
+    return ElevatedButton(
+      onPressed: () {
+        dbr.child("switch").set({"boolean": !_manualSiramActive});
+        setState(() {
+          _manualSiramActive = !_manualSiramActive;
+        });
+      },
+      style: ElevatedButton.styleFrom(
+        shape: const StadiumBorder(),
+        elevation: 20,
+        shadowColor: Colors.grey,
+        minimumSize: const Size(236, 60),
+        backgroundColor: const Color(0xFF4F6F52),
+      ),
+      child: Text(
+        _manualSiramActive ? 'Berhenti Siram' : 'Siram Sekarang',
+        style: TextStyle(fontSize: 18, color: Colors.white),
+      ),
+    );
   }
 }

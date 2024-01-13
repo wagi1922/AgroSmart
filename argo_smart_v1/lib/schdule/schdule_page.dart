@@ -1,6 +1,4 @@
-import 'package:argo_smart_v1/schdule/Disvectan.dart';
 import 'package:argo_smart_v1/schdule/penyiramanAir.dart';
-import 'package:argo_smart_v1/schdule/tombolSiram.dart';
 import 'package:flutter/material.dart';
 
 class SchedulePage extends StatelessWidget {
@@ -57,10 +55,6 @@ class SchedulePage extends StatelessWidget {
           child: Column(
             children: [
               SiramAir(),
-              SizedBox(height: 15),
-              Disvectan(),
-              SizedBox(height: 160),
-              Tombolsiram()
             ],
           ),
         ));

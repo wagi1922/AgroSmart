@@ -1,26 +1,27 @@
+import 'package:firebase_database/firebase_database.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
 
-class Disvectan extends StatefulWidget {
-  const Disvectan({Key? key}) : super(key: key);
+class SiramPestisida extends StatefulWidget {
+  const SiramPestisida({Key? key}) : super(key: key);
 
   @override
-  _SchwiggetState createState() => _SchwiggetState();
+  _SiramPestisidaState createState() => _SiramPestisidaState();
 }
 
-class _SchwiggetState extends State<Disvectan> {
-  TextEditingController _titleController = TextEditingController();
-  DateTime _selectedDate = DateTime.now();
-  TimeOfDay _selectedTime = TimeOfDay.now();
-  TimeOfDay _scheduledTime = TimeOfDay(hour: 24, minute: 0);
+class _SiramPestisidaState extends State<SiramPestisida> {
+  TimeOfDay _pestisidaTime = TimeOfDay.now();
   late StreamController<DateTime> _dateTimeController;
+  final databaseReference = FirebaseDatabase.instance.reference();
   bool _userSelectedNewTime = false;
 
   @override
   void initState() {
     super.initState();
     _dateTimeController = StreamController<DateTime>.broadcast();
+    _loadSavedTime();
     _startTimer();
   }
 
@@ -33,9 +34,28 @@ class _SchwiggetState extends State<Disvectan> {
   void _startTimer() {
     Timer.periodic(Duration(seconds: 1), (timer) {
       if (!_userSelectedNewTime) {
-        _dateTimeController.add(DateTime.now());
+        _updateCountdown();
       }
     });
+  }
+
+  Future<void> _loadSavedTime() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final savedHour =
+        prefs.getInt('selectedHourPestisida') ?? _pestisidaTime.hour;
+    final savedMinute =
+        prefs.getInt('selectedMinutePestisida') ?? _pestisidaTime.minute;
+
+    setState(() {
+      _pestisidaTime = TimeOfDay(hour: savedHour, minute: savedMinute);
+      _updateCountdown();
+    });
+  }
+
+  Future<void> _saveSelectedTime() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setInt('selectedHourPestisida', _pestisidaTime.hour);
+    prefs.setInt('selectedMinutePestisida', _pestisidaTime.minute);
   }
 
   @override
@@ -46,22 +66,12 @@ class _SchwiggetState extends State<Disvectan> {
         Container(
           width: 370,
           height: 155,
-          decoration: BoxDecoration(
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.2),
-                spreadRadius: 2,
-                blurRadius: 2,
-                offset: Offset(4, 4),
-              ),
-            ],
-            color: Color.fromARGB(255, 189, 255, 180),
-          ),
+          decoration: _buildContainerDecoration(),
           child: Column(
             children: [
-              SizedBox(height: 15),
+              SizedBox(height: 10),
               _buildTimeContainer(),
-              SizedBox(height: 15),
+              SizedBox(height: 10),
               _buildScheduleContainer(),
             ],
           ),
@@ -70,12 +80,35 @@ class _SchwiggetState extends State<Disvectan> {
     );
   }
 
+  BoxDecoration _buildContainerDecoration() {
+    return BoxDecoration(
+      boxShadow: [
+        BoxShadow(
+          color: Colors.grey.withOpacity(0.25),
+          spreadRadius: 4,
+          blurRadius: 4,
+          offset: Offset(4, 4),
+        ),
+      ],
+      color: Color.fromARGB(255, 189, 255, 180),
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(10),
+        topRight: Radius.circular(10),
+      ),
+      gradient: LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [Color(0xffddffc3), Color(0x00fbffcf)],
+      ),
+    );
+  }
+
   Widget _buildTimeContainer() {
     return Row(
       children: [
-        SizedBox(width: 15),
+        SizedBox(width: 13),
         _buildTimeTextContainer(),
-        SizedBox(width: 10),
+        SizedBox(width: 5),
         Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
@@ -86,7 +119,7 @@ class _SchwiggetState extends State<Disvectan> {
               child: _buildDayText(),
             ),
             Container(
-              width: 180,
+              width: 190,
               height: 30,
               alignment: Alignment.bottomRight,
               child: _buildCountdown(),
@@ -100,25 +133,24 @@ class _SchwiggetState extends State<Disvectan> {
   Widget _buildTimeTextContainer() {
     return Container(
       width: 150,
-      height: 50,
+      height: 60,
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.transparent, width: 5),
+        borderRadius: BorderRadius.circular(6),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            spreadRadius: 2,
-            blurRadius: 2,
+            color: Colors.grey.withOpacity(0.25),
+            spreadRadius: 3,
+            blurRadius: 3,
             offset: Offset(4, 4),
           ),
         ],
-        color: Color.fromARGB(255, 235, 255, 223),
+        color: Color.fromARGB(255, 238, 253, 228),
       ),
       child: Center(
         child: Text(
-          '${_formatTime(_selectedTime)}',
+          '${_formatTime(_pestisidaTime)}',
           style: TextStyle(
-            fontSize: 30,
-            fontWeight: FontWeight.bold,
+            fontSize: 40,
             color: Colors.black,
           ),
         ),
@@ -173,16 +205,18 @@ class _SchwiggetState extends State<Disvectan> {
   Widget _buildScheduleContainer() {
     return Container(
       width: 370,
-      height: 45,
+      height: 55,
       decoration: BoxDecoration(
         border: Border.all(color: Colors.transparent, width: 5),
         color: Color(0xffb6f490),
       ),
       child: Row(
         children: [
-          Text("  Jadwal Penyiraman Disvectan",
-              style: TextStyle(fontWeight: FontWeight.bold)),
-          SizedBox(width: 100),
+          Text(
+            "  Jadwal Siram Pestisida Otomatis",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+          ),
+          SizedBox(width: 65),
           IconButton(
             icon: Icon(Icons.edit),
             onPressed: () => _selectTime(context),
@@ -195,13 +229,21 @@ class _SchwiggetState extends State<Disvectan> {
   Widget _buildCountdown() {
     final now = DateTime.now();
     final scheduledDateTime = DateTime(now.year, now.month, now.day,
-        _scheduledTime.hour, _scheduledTime.minute);
-    final difference = scheduledDateTime.difference(now);
+        _pestisidaTime.hour, _pestisidaTime.minute);
 
-    return Text(
-      'Akan mulai ${_formatDuration(difference)}',
-      style: TextStyle(fontSize: 12, color: Colors.black),
-    );
+    if (scheduledDateTime.isBefore(now)) {
+      // Jika waktu yang dijadwalkan sudah lewat, tampilkan pesan yang sesuai
+      return Text(
+        'Penyiraman telah dilakukan',
+        style: TextStyle(fontSize: 12, color: Colors.black),
+      );
+    } else {
+      final difference = scheduledDateTime.difference(now);
+      return Text(
+        'Akan dimulai ${_formatDuration(difference)}',
+        style: TextStyle(fontSize: 12, color: Colors.black),
+      );
+    }
   }
 
   String _formatDuration(Duration duration) {
@@ -213,13 +255,13 @@ class _SchwiggetState extends State<Disvectan> {
 
   Future<void> _selectTime(BuildContext context) async {
     final time =
-        await showTimePicker(context: context, initialTime: _selectedTime);
+        await showTimePicker(context: context, initialTime: _pestisidaTime);
     if (time != null) {
       setState(() {
-        _selectedTime = time;
-        _userSelectedNewTime =
-            false; // Reset to false when user selects new time
+        _pestisidaTime = time;
+        _userSelectedNewTime = false;
         _updateCountdown();
+        _saveSelectedTime();
       });
     }
   }
@@ -230,12 +272,11 @@ class _SchwiggetState extends State<Disvectan> {
       now.year,
       now.month,
       now.day,
-      _selectedTime.hour,
-      _selectedTime.minute,
+      _pestisidaTime.hour,
+      _pestisidaTime.minute,
     );
     final difference = scheduledDateTime.difference(now);
 
-    _dateTimeController
-        .add(now.add(difference)); // Use scheduled time for countdown
+    _dateTimeController.add(now.add(difference));
   }
 }

@@ -1,6 +1,5 @@
 import 'package:argo_smart_v1/page/homePage.dart';
 import 'package:argo_smart_v1/schdule/schdule_page.dart';
-import 'package:argo_smart_v1/schdule/tombolSiram.dart';
 import 'package:argo_smart_v1/page/setingPage.dart';
 import 'package:flutter/material.dart';
 
