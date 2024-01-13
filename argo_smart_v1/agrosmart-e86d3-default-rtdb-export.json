@@ -1,0 +1,23 @@
+{
+  "adc": {
+    "int": 0
+  },
+  "intensitas_cahaya": {
+    "int": -2
+  },
+  "kelembapan": {
+    "int": 0
+  },
+  "kelembapan_ruangan": {
+    "int": 2147483647
+  },
+  "ph": {
+    "int": 7
+  },
+  "suhu": {
+    "int": 2147483647
+  },
+  "switch": {
+    "boolean": false
+  }
+}

@@ -13,6 +13,7 @@ class SiramPestisida extends StatefulWidget {
 
 class _SiramPestisidaState extends State<SiramPestisida> {
   TimeOfDay _pestisidaTime = TimeOfDay.now();
+  DateTime _selectedDate = DateTime.now();
   late StreamController<DateTime> _dateTimeController;
   final databaseReference = FirebaseDatabase.instance.reference();
   bool _userSelectedNewTime = false;
@@ -45,9 +46,12 @@ class _SiramPestisidaState extends State<SiramPestisida> {
         prefs.getInt('selectedHourPestisida') ?? _pestisidaTime.hour;
     final savedMinute =
         prefs.getInt('selectedMinutePestisida') ?? _pestisidaTime.minute;
+    final savedDate = prefs.getString('selectedDatePestisida') ?? "";
 
     setState(() {
       _pestisidaTime = TimeOfDay(hour: savedHour, minute: savedMinute);
+      _selectedDate =
+          savedDate.isNotEmpty ? DateTime.parse(savedDate) : DateTime.now();
       _updateCountdown();
     });
   }
@@ -56,6 +60,7 @@ class _SiramPestisidaState extends State<SiramPestisida> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setInt('selectedHourPestisida', _pestisidaTime.hour);
     prefs.setInt('selectedMinutePestisida', _pestisidaTime.minute);
+    prefs.setString('selectedDatePestisida', _selectedDate.toIso8601String());
   }
 
   @override
@@ -106,23 +111,17 @@ class _SiramPestisidaState extends State<SiramPestisida> {
   Widget _buildTimeContainer() {
     return Row(
       children: [
-        SizedBox(width: 13),
+        SizedBox(width: 15),
         _buildTimeTextContainer(),
-        SizedBox(width: 5),
+        SizedBox(width: 15),
         Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Container(
-              width: 100,
-              height: 50,
+              width: 190,
+              height: 70,
               alignment: Alignment.topRight,
               child: _buildDayText(),
-            ),
-            Container(
-              width: 190,
-              height: 30,
-              alignment: Alignment.bottomRight,
-              child: _buildCountdown(),
             ),
           ],
         ),
@@ -166,19 +165,31 @@ class _SiramPestisidaState extends State<SiramPestisida> {
   }
 
   Widget _buildDayText() {
-    return Align(
-      alignment: Alignment.topRight,
-      child: StreamBuilder<DateTime>(
-        stream: _dateTimeController.stream,
-        builder: (context, snapshot) {
-          final currentTime = snapshot.data ?? DateTime.now();
-          return Text(
-            '${_formatDay(DateFormat('EEEE').format(currentTime))}',
-            style: TextStyle(fontSize: 18, color: Colors.black),
-          );
-        },
-      ),
+    return Column(
+      children: [
+        Align(
+          alignment: Alignment.topRight,
+          child: IconButton(
+            icon: Icon(Icons.cancel),
+            onPressed: () => _cancelSchedule(),
+          ),
+        ),
+        StreamBuilder<DateTime>(
+          stream: _dateTimeController.stream,
+          builder: (context, snapshot) {
+            final currentTime = snapshot.data ?? DateTime.now();
+            return Text(
+              '${_formatDateTime(currentTime)}',
+              style: TextStyle(fontSize: 15, color: Colors.black),
+            );
+          },
+        ),
+      ],
     );
+  }
+
+  String _formatDateTime(DateTime dateTime) {
+    return '${_formatDay(DateFormat('EEEE').format(dateTime))}, ${DateFormat('d MMMM y').format(dateTime)}';
   }
 
   String _formatDay(String englishDay) {
@@ -216,67 +227,65 @@ class _SiramPestisidaState extends State<SiramPestisida> {
             "  Jadwal Siram Pestisida Otomatis",
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
           ),
-          SizedBox(width: 65),
+          SizedBox(width: 70),
           IconButton(
             icon: Icon(Icons.edit),
-            onPressed: () => _selectTime(context),
+            onPressed: () => _selectDateTime(context),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildCountdown() {
-    final now = DateTime.now();
-    final scheduledDateTime = DateTime(now.year, now.month, now.day,
-        _pestisidaTime.hour, _pestisidaTime.minute);
+  Future<void> _selectDateTime(BuildContext context) async {
+    final DateTime? selectedDateTime = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now()
+          .add(Duration(days: 30)), // Set maksimum 30 hari ke depan
+    );
 
-    if (scheduledDateTime.isBefore(now)) {
-      // Jika waktu yang dijadwalkan sudah lewat, tampilkan pesan yang sesuai
-      return Text(
-        'Penyiraman telah dilakukan',
-        style: TextStyle(fontSize: 12, color: Colors.black),
+    if (selectedDateTime != null) {
+      final TimeOfDay? selectedTime = await showTimePicker(
+        context: context,
+        initialTime: _pestisidaTime,
       );
-    } else {
-      final difference = scheduledDateTime.difference(now);
-      return Text(
-        'Akan dimulai ${_formatDuration(difference)}',
-        style: TextStyle(fontSize: 12, color: Colors.black),
-      );
-    }
-  }
 
-  String _formatDuration(Duration duration) {
-    final hours = duration.inHours;
-    final minutes = duration.inMinutes % 60;
-
-    return '$hours jam $minutes menit lagi';
-  }
-
-  Future<void> _selectTime(BuildContext context) async {
-    final time =
-        await showTimePicker(context: context, initialTime: _pestisidaTime);
-    if (time != null) {
-      setState(() {
-        _pestisidaTime = time;
-        _userSelectedNewTime = false;
-        _updateCountdown();
-        _saveSelectedTime();
-      });
+      if (selectedTime != null) {
+        setState(() {
+          _selectedDate = selectedDateTime;
+          _pestisidaTime = selectedTime;
+          _userSelectedNewTime = true;
+          _updateCountdown();
+          _saveSelectedTime();
+        });
+      }
     }
   }
 
   void _updateCountdown() {
     final now = DateTime.now();
     final scheduledDateTime = DateTime(
-      now.year,
-      now.month,
-      now.day,
+      _selectedDate.year,
+      _selectedDate.month,
+      _selectedDate.day,
       _pestisidaTime.hour,
       _pestisidaTime.minute,
     );
     final difference = scheduledDateTime.difference(now);
 
     _dateTimeController.add(now.add(difference));
+  }
+
+  void _cancelSchedule() {
+    setState(() {
+      _pestisidaTime = TimeOfDay(hour: 0, minute: 0); // Reset jam penyiraman
+      _selectedDate = DateTime.now(); // Reset tanggal penyiraman
+      _userSelectedNewTime = false;
+      _dateTimeController.add(DateTime
+          .now()); // Merubah status countdown menjadi penyiraman dibatalkan
+      _saveSelectedTime();
+    });
   }
 }
