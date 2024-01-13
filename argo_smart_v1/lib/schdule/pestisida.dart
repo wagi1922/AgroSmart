@@ -118,7 +118,7 @@ class _SiramPestisidaState extends State<SiramPestisida> {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Container(
-              width: 190,
+              width: 170,
               height: 70,
               alignment: Alignment.topRight,
               child: _buildDayText(),
@@ -227,7 +227,7 @@ class _SiramPestisidaState extends State<SiramPestisida> {
             "  Jadwal Siram Pestisida Otomatis",
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
           ),
-          SizedBox(width: 70),
+          SizedBox(width: 60),
           IconButton(
             icon: Icon(Icons.edit),
             onPressed: () => _selectDateTime(context),

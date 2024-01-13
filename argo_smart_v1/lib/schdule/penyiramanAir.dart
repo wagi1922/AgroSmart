@@ -109,7 +109,7 @@ class _SiramAirState extends State<SiramAir> {
   Widget _buildTimeContainer() {
     return Row(
       children: [
-        SizedBox(width: 13),
+        SizedBox(width: 10),
         _buildTimeTextContainer(),
         SizedBox(width: 5),
         Column(
@@ -219,7 +219,7 @@ class _SiramAirState extends State<SiramAir> {
             "  Jadwal Siram Air Otomatis",
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
           ),
-          SizedBox(width: 115),
+          SizedBox(width: 95),
           IconButton(
             icon: Icon(Icons.edit),
             onPressed: () => _selectTime(context),
