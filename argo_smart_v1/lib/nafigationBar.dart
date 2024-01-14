@@ -14,7 +14,7 @@ class _MyAppState extends State<NavBar> {
   final List<Widget> _pages = [
     Center(child: HomePage()),
     Center(child: SchedulePage()),
-    Center(child: SetingingPage()),
+    Center(child: SettingPage()),
   ];
 
   void _onItemTapped(int index) {
