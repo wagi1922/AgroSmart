@@ -105,10 +105,11 @@ class _HelpButton extends State<HelpButtn> {
                 color: Colors.black,
               ),
               const SizedBox(width: 8),
-              const Text(
-                "MyESP",
-                style: TextStyle(color: Colors.black),
-              ),
+              const Text("Layanan Pengaduan",
+                  style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.black))
             ],
           ),
         ),
@@ -146,10 +147,11 @@ class _HelpButton extends State<HelpButtn> {
                 color: Colors.black,
               ),
               const SizedBox(width: 8),
-              const Text(
-                "MyESP",
-                style: TextStyle(color: Colors.black),
-              ),
+              const Text("Laporkan Masalah",
+                  style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.black))
             ],
           ),
         ),

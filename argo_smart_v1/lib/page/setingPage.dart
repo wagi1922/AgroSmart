@@ -1,4 +1,5 @@
 import 'package:argo_smart_v1/page/help.dart';
+import 'package:argo_smart_v1/page/login_page.dart';
 import 'package:flutter/material.dart';
 
 class SettingPage extends StatelessWidget {
@@ -61,6 +62,9 @@ class SettingPage extends StatelessWidget {
             _buildTextLaporan(),
             SizedBox(height: 5),
             HelpButtn(),
+            Spacer(),
+            _logoutButton(),
+            SizedBox(height: 30)
           ],
         ),
       ),
@@ -253,6 +257,27 @@ class SettingPage extends StatelessWidget {
             ],
           );
         },
+      ),
+    );
+  }
+
+  Widget _logoutButton() {
+    return Center(
+      child: ElevatedButton(
+        onPressed: () {
+          LoginPage();
+        },
+        style: ElevatedButton.styleFrom(
+          shape: const StadiumBorder(),
+          elevation: 20,
+          shadowColor: Colors.grey,
+          minimumSize: const Size(180, 60),
+          backgroundColor: const Color(0xFF4F6F52),
+        ),
+        child: const Text(
+          "Log Out",
+          style: const TextStyle(color: Colors.white),
+        ),
       ),
     );
   }
