@@ -396,8 +396,8 @@ class _PHMeterState extends State<Meteran> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: generateValues,
-        child: Icon(Icons.refresh),
-        backgroundColor: Color.fromARGB(255, 200, 255, 193),
+        backgroundColor: const Color.fromARGB(0, 255, 255, 255),
+        elevation: 0.0,
       ),
     );
   }

@@ -24,9 +24,6 @@ class _LoginPageState extends State<LoginPage> {
         email: emailController.text,
         password: passwordController.text,
       );
-      setState(() {
-        _isLoginFailed = false;
-      });
       // If authentication is successful, navigate to the next screen
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
         return NavBar();

@@ -37,8 +37,12 @@ class _SiramAirState extends State<SiramAir> {
 
   void _startTimer() {
     Timer.periodic(Duration(seconds: 1), (timer) {
-      if (!_userSelectedNewTime) {
-        _dateTimeController.add(DateTime.now());
+      if (!_dateTimeController.isClosed) {
+        if (!_userSelectedNewTime) {
+          _dateTimeController.add(DateTime.now());
+        }
+      } else {
+        timer.cancel(); // Cancel the timer if the controller is closed
       }
     });
   }

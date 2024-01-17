@@ -265,17 +265,19 @@ class _SiramPestisidaState extends State<SiramPestisida> {
   }
 
   void _updateCountdown() {
-    final now = DateTime.now();
-    final scheduledDateTime = DateTime(
-      _selectedDate.year,
-      _selectedDate.month,
-      _selectedDate.day,
-      _pestisidaTime.hour,
-      _pestisidaTime.minute,
-    );
-    final difference = scheduledDateTime.difference(now);
+    if (!_dateTimeController.isClosed) {
+      final now = DateTime.now();
+      final scheduledDateTime = DateTime(
+        _selectedDate.year,
+        _selectedDate.month,
+        _selectedDate.day,
+        _pestisidaTime.hour,
+        _pestisidaTime.minute,
+      );
+      final difference = scheduledDateTime.difference(now);
 
-    _dateTimeController.add(now.add(difference));
+      _dateTimeController.add(now.add(difference));
+    }
   }
 
   void _cancelSchedule() {
